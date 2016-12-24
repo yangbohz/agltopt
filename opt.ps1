@@ -2,13 +2,14 @@
                    安装前优化脚本
 按照安装手册进行，主要是将需要手动点击的项目变更为直接修改注册表项
 编写人：杨波，email：bo.yang@non.agilent.com
-ver：0.6
+ver：0.7
 changelog:初次释放
 changelog:引导bat脚本修改，一次运行即可，修改netfx3 non http激活参数，避免关联项无法激活导致的失败，修改网卡电源管理语句
 changelog:部分注册表键值类型未指定，修正；添加操作系统判断部分；添加部分新内容
 changelog:增减部分系统判断条件。修正语法错误
 changelog:修改系统判断，增加语言判断，增加自动IP设定
 changelog:修改引导bat，适应更多情况，加入管理员权限判断及运行提示
+changelog:修改引导bat中管理员权限判断方式，增加自动启用netfx3功能。针对低版本powershell版本禁用了自动IP功能。
 #>
 
 #强制以管理员运行,如需直接运行本脚本，请将下一部分取消注释，并且提前修改powershell执行策略
@@ -28,7 +29,11 @@ if( -not $currentWp.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
 #>
 
 #检查操作系统版本
-if ($psversiontable.BuildVersion.Major -eq 10){
+if ($psversiontable.BuildVersion -eq 7600) {
+	Write-Warning '检测到未安装SP1的Windows 7，在安装光盘的disk6下面有补丁，请事先安装一下，大概需要一个小时的时间'
+	exit
+}
+elseif ($psversiontable.BuildVersion.Major -eq 10){
 	$OSVer = 10
 }
 elseif($psversiontable.BuildVersion.Major -eq 6 -and $psversiontable.BuildVersion.Minor -eq 1){
@@ -258,8 +263,8 @@ if ($psversiontable.PSVersion.Major -gt 2) {
 }
 
 
-#恢复powershell默认脚本安全策略为仅允许签名脚本运行
-Set-ExecutionPolicy -ExecutionPolicy Restricted
+#调整powershell脚本安全策略为远程脚本需签名
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
 
 #重启计算机提示
-Write-Host -BackgroundColor Gray -ForegroundColor Green '脚本执行完毕，部分修改需要重启计算机后生效'
+Write-Host  -ForegroundColor Green '脚本执行完毕，部分修改需要重启计算机后生效'
