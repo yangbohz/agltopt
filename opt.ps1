@@ -211,11 +211,14 @@ if ($OSVer -ne 10){
 Set-ItemProperty HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System -Name EnableLUA -Value 0
 
 #禁用系统还原
-
+#删除注册表键，可能存在未知危险，暂不启用，使用cmdlet
+<#
 $SR= 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore'
 New-Item $SR -Force
 New-ItemProperty $SR -Name RPSessionInterval -Type Dword -Value 0
 Remove-Item 'HKLM:\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\SPP' -Recurse
+#>
+Disable-ComputerRestore -Drive ([System.Environment]::GetLogicalDrives())
 
 #Openlab 0202不联网工作站加速注册表，注意：如果此计算机从未链接过互联网，应用此处优化后在进行上网浏览时会导致根证书无法更新而造成大多数https网页无法正常加载，需要手动恢复设置方可正常上网
 New-Item HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\AuthRoot -Force
